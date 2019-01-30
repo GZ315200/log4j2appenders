@@ -57,8 +57,4 @@ public class SqsAppender extends AbstractAppender {
         }
         return new SqsAppender(name, filter, layout, ignoreExceptions);
     }
-
-    public static void main(String[] args) {
-        System.out.println(Math.log(10000));
-    }
 }
