@@ -1,5 +1,6 @@
 package com.strikingly.data.log4j2appenders;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
@@ -21,7 +22,7 @@ public class SqsAppender extends AbstractAppender {
     private static AmazonSQS sqsClient;
     private static String sqsUrl = null;
 
-    public SqsAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
+    private SqsAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions);
     }
 
@@ -37,7 +38,7 @@ public class SqsAppender extends AbstractAppender {
                                              @PluginElement("Layout") Layout<? extends Serializable> layout,
                                              @PluginAttribute("ignoreExceptions") boolean ignoreExceptions) {
         if (name == null) {
-            LOGGER.error("no name defined in conf.");
+            System.err.println("no name defined in conf.");
             return null;
         }
         if (layout == null) {
@@ -49,11 +50,15 @@ public class SqsAppender extends AbstractAppender {
                 region = "cn-north-1";
             }
 
-            sqsClient = AmazonSQSClientBuilder.standard().withRegion(region).build();
+            sqsClient = AmazonSQSClientBuilder.
+                    standard()
+                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                    .withRegion(region)
+                    .build();
             GetQueueUrlResult queueUrlResult = sqsClient.getQueueUrl(queueName);
             sqsUrl = queueUrlResult.getQueueUrl();
         } catch (Exception exp) {
-            LOGGER.error("SQS name error", exp);
+            System.err.println(exp);
         }
         return new SqsAppender(name, filter, layout, ignoreExceptions);
     }
