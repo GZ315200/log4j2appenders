@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration status="WARN" monitorInterval="30" packages="com.strikingly.data.log4j2appenders">
+
+    <appenders>
+        <console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[ %p ] [%-d{yyyy-MM-dd HH:mm:ss}] [%l] %m%n"/>
+        </console>
+
+        <SqsAppender name="SqsAppender" queueName="data-monitor">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout charset="UTF-8" pattern="%m%n"/>
+        </SqsAppender>
+    </appenders>
+
+    <loggers>
+        <logger name="com.strikingly.data.log4j2appenders.SqsAppender" level="WARN">
+            <AppenderRef ref="SqsAppender" />
+        </logger>
+        <root level="INFO">
+            <appender-ref ref="Console" level="INFO"/>
+            <AppenderRef ref="SqsAppender" level="WARN"/>
+        </root>
+    </loggers>
+</configuration>

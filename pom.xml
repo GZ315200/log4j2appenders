@@ -9,27 +9,34 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
+
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.11.1</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.11.1</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.11.1</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.54</version>
+        </dependency>
 
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -43,10 +50,23 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.edwgiz</groupId>
+            <artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <finalName>log4j2appenders</finalName>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -77,50 +97,103 @@
             </plugin>
 
 
-         <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-shade-plugin</artifactId>
-             <version>2.3</version>
-             <executions>
-                 <execution>
-                     <phase>package</phase>
-                     <goals>
-                         <goal>shade</goal>
-                     </goals>
 
-                     <configuration>
-                         <finalName>loggerAppender</finalName>
-                         <filters>
-                             <filter>
-                                 <artifact>*:*</artifact>
-                                 <excludes>
-                                     <exclude>META-INF/*.SF</exclude>
-                                     <exclude>META-INF/*.DSA</exclude>
-                                     <exclude>META-INF/*.RSA</exclude>
-                                     <exclude>org/slf4j/impl/StaticLoggerBinder</exclude>
-                                 </excludes>
-                             </filter>
-                         </filters>
-                         <artifactSet>
-                             <excludes>
-                                 <exclude>*:slf4j-api</exclude>
-                             </excludes>
-                         </artifactSet>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>com.strikingly.data.log4j2appenders.Main</Main-Class>
+                                        <Build-Number>123</Build-Number>
+                                    </manifestEntries>
+                                </transformer>
+                                <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer" />
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.edwgiz</groupId>
+                        <artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
+                        <version>2.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 
-                         <!--<transformers>-->
-                                 <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-                                     <!--<manifestEntries>-->
-                                         <!--<Main-Class>com.strikingly.data.log4j2appenders.SqsAppender</Main-Class>-->
-                                         <!--<Build-Number>123</Build-Number>-->
-                                     <!--</manifestEntries>-->
-                                 <!--</transformer>-->
-                         <!--</transformers>-->
 
-                     </configuration>
-                 </execution>
-             </executions>
-         </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-shade-plugin</artifactId>-->
+            <!--<version>2.4.1</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>shade</goal>-->
+            <!--</goals>-->
+
+            <!--<configuration>-->
+            <!--<finalName>loggerAppender</finalName>-->
+            <!--<filters>-->
+            <!--<filter>-->
+            <!--<artifact>*:*</artifact>-->
+            <!--<excludes>-->
+            <!--<exclude>META-INF/*.SF</exclude>-->
+            <!--<exclude>META-INF/*.DSA</exclude>-->
+            <!--<exclude>META-INF/*.RSA</exclude>-->
+            <!--<exclude>*.properties</exclude>-->
+            <!--</excludes>-->
+            <!--</filter>-->
+            <!--</filters>-->
+            <!--&lt;!&ndash;<artifactSet>&ndash;&gt;-->
+            <!--&lt;!&ndash;<excludes>&ndash;&gt;-->
+            <!--&lt;!&ndash;<exclude>*:slf4j-api</exclude>&ndash;&gt;-->
+            <!--&lt;!&ndash;</excludes>&ndash;&gt;-->
+            <!--&lt;!&ndash;</artifactSet>&ndash;&gt;-->
+
+            <!--<transformers>-->
+
+
+            <!--<transformers>-->
+            <!--<transformer-->
+            <!--implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>-->
+            <!--</transformers>-->
+            <!--</transformers>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+
+
+            <!--</plugin>-->
         </plugins>
     </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>oss.sonatype.org</id>
+            <name>OSS Sonatype Staging</name>
+            <url>https://oss.sonatype.org/content/groups/staging</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
